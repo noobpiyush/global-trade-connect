@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Companies
+model Company {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  address     String
+  gstNumber   String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  products    Product[]
+  orders      Order[]
+
+  Query Query[]
+}
+
+// Users
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  name        String
+  role        UserRole @default(ADMIN)
+  companyId   String?
+  createdAt   DateTime @default(now())
+
+  company     Company?  @relation(fields: [companyId], references: [id])
+
+  Query Query[]
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+// Products
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  price       Float
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company     Company  @relation(fields: [companyId], references: [id])
+}
+
+// Orders
+model Order {
+  id          String   @id @default(uuid())
+  orderNumber String   @unique
+  totalAmount Float
+  companyId   String
+  status      OrderStatus
+  createdAt   DateTime @default(now())
+
+  company     Company  @relation(fields: [companyId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+// Queries
+model Query {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  companyId   String
+  userId      String
+  status      QueryStatus
+  createdAt   DateTime @default(now())
+
+  company     Company  @relation(fields: [companyId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+enum QueryStatus {
+  OPEN
+  CLOSED
+}
