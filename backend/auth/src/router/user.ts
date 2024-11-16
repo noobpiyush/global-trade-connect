@@ -1,16 +1,10 @@
 import express from "express";
 import { signinSchema, signupSchema } from "../zod-schemas/zod";
-
-import { PrismaClient } from "@prisma/client";
-
 import jwt from "jsonwebtoken";
-
-const prisma = new PrismaClient();
-
 import bcrypt from "bcrypt";
-
+import { JWT_SECRET } from "../config/config";
+import { prisma } from "../db/db";
 export const userRouter = express.Router();
-
 userRouter.get("/test-pt", async (req, res) => {
   console.log(req.headers);
   res.send("hii there from userRouter");
@@ -38,10 +32,10 @@ userRouter.post("/sign-up", async (req, res) => {
       {
         payload,
       },
-      "piyush"
+      JWT_SECRET
     );
 
-    res.send({
+    res.status(200).send({
       msg: "User created sucessfully",
       token,
     });
@@ -80,7 +74,7 @@ userRouter.post("/sign-in", async (req, res) => {
         const payload = user.id;
         const token = jwt.sign({
            payload
-        },"piyush");
+        },JWT_SECRET);
 
         res.status(200).json({
             token:token

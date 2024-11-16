@@ -1,31 +1,66 @@
 import { Eye, EyeOff, Globe } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { SingupUrl } from "@/GlobalApi";
 
 export const Signup = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
+  const [fullName, setFullName] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e : React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      console.log("inside handleSubmit");
+      const res = await axios.post(SingupUrl,{
+        email,
+        fullName,
+        password
+      })
+
+      // if (res.status != 200) {
+      //   alert("something went wrong")
+      //   console.log(res.status);
+      //   return;
+      // }
+
+      console.log("before jwt");
+
+      const jwt = res.data.token;
+      localStorage.setItem("token",jwt);
+      navigate("/info-form");
+      console.log("after jwt");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-30000 flex flex-col justify-center items-center px-4">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex flex-col justify-center items-center px-4">
       <div className="max-w-md bg-white w-full rounded-lg shadow-md p-8">
         <div className="flex justify-center mb-8">
           <Globe className="size-12 text-blue-600" />
         </div>
         <h2 className="text-3xl font-bold text-center">
-          Login to Global Trade Connect
+          Signup to Global Trade Connect
         </h2>
-        <form className="space-y-6 ">
+        <form onSubmit={handleSubmit} className="space-y-6 ">
           <div>
             <div className="pb-2">
-              <Label htmlFor="email">Full Name</Label>
+              <Label htmlFor="fullName">Full Name</Label>
             </div>
             <Input
-              id="email"
-              type="email"
+              id="fullName"
+              type="text"
               placeholder="Piyush Waghela"
               required
+              onChange={(e) => setFullName((e.target as HTMLInputElement).value)}
             />
           </div>
           <div>
@@ -37,16 +72,18 @@ export const Signup = () => {
               type="email"
               placeholder="piyush@gmail.com"
               required
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div>
             <Label htmlFor="password">Password</Label>
             <div className="relative gap-2 pt-2">
               <Input
-                id="password"
+                id="password" 
                 type={showPassword ? "text" : "password"}
                 placeholder="********"
                 required
+                onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
@@ -62,7 +99,7 @@ export const Signup = () => {
             </div>
           </div>
           <Button type="submit" className="w-full">
-            Log In
+           Sign Up
           </Button>
         </form>
         <div className="mt-6 text-center">
@@ -72,9 +109,9 @@ export const Signup = () => {
         </div>
       </div>
       <p className="mt-8 text-center text-sm text-gray-600">
-        Don{"' "} have an account?{" "}
-        <Link to="#" className="font-medium text-blue-600 hover:underline">
-          Sign up
+        Already have an account?{" "}
+        <Link to="/sign-in" className="font-medium text-blue-600 hover:underline">
+          Sign In
         </Link>
       </p>
     </div>

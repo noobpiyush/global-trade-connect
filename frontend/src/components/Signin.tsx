@@ -3,12 +3,40 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { SinginUrl } from "@/GlobalApi";
+import axios from "axios";
 
 export const Signin = () => {
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const handleSubmit = async (e : React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      console.log("inside handleSubmit");
+      const res = await axios.post(SinginUrl,{
+        email,
+        password
+      })
+
+      // if (res.status != 200) {
+      //   alert("something went wrong")
+      //   console.log(res.status);
+      //   return;
+      // }
+      console.log("before jwt");
+      const jwt = res.data.token;
+      localStorage.setItem("token",jwt);
+      navigate("/dashboard");
+      console.log("after jwt");
+    } catch (error) {
+      console.log(error);
+    }
+  }
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-30000 flex flex-col justify-center items-center px-4">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex flex-col justify-center items-center px-4">
       <div className="max-w-md bg-white w-full rounded-lg shadow-md p-8">
         <div className="flex justify-center mb-8">
           <Globe className="size-12 text-blue-600" />
@@ -16,7 +44,7 @@ export const Signin = () => {
         <h2 className="text-3xl font-bold text-center">
           Login to Global Trade Connect
         </h2>
-        <form className="space-y-6 ">
+        <form onSubmit={handleSubmit} className="space-y-6 ">
           <div>
             <div className="pb-2">
               <Label htmlFor="email">Email</Label>
@@ -26,6 +54,7 @@ export const Signin = () => {
               type="email"
               placeholder="vedika@gmail.com"
               required
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div>
@@ -36,6 +65,7 @@ export const Signin = () => {
                 type={showPassword ? "text" : "password"}
                 placeholder="********"
                 required
+                onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
